@@ -1,0 +1,91 @@
+import init.smdk4x12.usb.rc
+import init.connectivity.rc
+
+on init
+	mkdir /mnt/shell/emulated 0700 shell shell
+	mkdir /storage/emulated 0555 root root
+	mkdir /storage/sdcard0/.android_secure 0775 system system
+
+	mkdir /mnt/media_rw/sdcard0 0700 media_rw media_rw
+	mkdir /storage/sdcard0 0700 root root
+
+	mkdir /mnt/media_rw/sdcard1 0700 media_rw media_rw
+	mkdir /storage/sdcard1 0700 root root
+
+	mkdir /mnt/media_rw/usbdisk 0700 media_rw media_rw
+	mkdir /storage/usbdisk 0700 root root
+
+	export EXTERNAL_STORAGE /storage/sdcard0
+	export SECONDARY_STORAGE /storage/sdcard1:/storage/usbdisk
+
+	# for backwards compatibilit
+	symlink /storage/sdcard0 /sdcard
+	symlink /storage/sdcard0 /mnt/sdcard
+	symlink /storage/sdcard1 /extsd
+	symlink /storage/sdcard1 /mnt/extsd
+	symlink /storage/usbdisk /usbdisk
+	symlink /storage/sdcard1 /mnt/usbdisk
+
+on boot
+	mount debugfs /sys/kernel/debug /sys/kernel/debug
+#	setprop ro.radio.noril yes
+
+	# Set up kernel tracing, but disable it by default
+	chmod 0222 /sys/kernel/debug/tracing/trace_marker
+	write /sys/kernel/debug/tracing/tracing_on 0
+
+on post-fs-data
+	# we will remap this as /mnt/sdcard with the sdcard fuse tool
+	mkdir /data/media 0775 media_rw media_rw
+	setprop vold.post_fs_data_done 1
+	mkdir /data/misc/dhcp 0770 dhcp dhcp
+	chown dhcp dhcp /data/misc/dhcp
+	mkdir /data/misc/wifi 0770 wifi wifi
+	mkdir /data/misc/wifi/sockets 0770 wifi wifi
+
+on fs
+	mount_all /fstab.smdk4x12
+	setprop ro.crypto.fuse_sdcard true
+	setprop wifi.interface "wlan0"
+	setprop wlan.interface "wlan0"
+	
+
+# Permissions for backlight
+	chmod 0666 /sys/class/backlight/pwm-backlight.0/brightness
+	chown system system /sys/class/backlight/pwm-backlight.0/brightness
+# su daemon
+service su_daemon /system/xbin/su --daemon
+	class core
+	user root
+	group root
+	oneshot
+
+# virtual sdcard daemon running as media_rw (1023)
+service fuse_sdcard0 /system/bin/sdcard -u 1023 -g 1023 -w 1023 -d /mnt/media_rw/sdcard0 /storage/sdcard0
+    class late_start
+    disabled
+
+service fuse_sdcard1 /system/bin/sdcard -u 1023 -g 1023 -w 1023 -d /mnt/media_rw/sdcard1 /storage/sdcard1
+    class late_start
+    disabled
+    
+service fuse_usbdisk /system/bin/sdcard -u 1023 -g 1023 -w 1023 -d /mnt/media_rw/usbdisk /storage/usbdisk
+    class late_start
+    disabled
+
+# create filesystems if necessary
+service setup_fs /system/bin/setup_fs mmcblk0p3 mmcblk0p4
+	class core
+	user root
+	group root
+	oneshot
+
+service dhcpcd_eth0 /system/bin/dhcpcd -ABDKL
+	class main
+	disabled
+	oneshot
+
+service iprenew_eth0 /system/bin/dhcpcd -n
+	class main
+	disabled
+	oneshot
