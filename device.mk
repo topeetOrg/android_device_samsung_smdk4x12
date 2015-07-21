@@ -92,6 +92,10 @@ PRODUCT_COPY_FILES += \
 	device/samsung/smdk4x12/apk/ESFileBrowser.apk:system/app/ESFileBrowser.apk  \
 
 PRODUCT_COPY_FILES += \
+	device/samsung/smdk4x12/apk/Set Orientation.apk:system/app/SetOrientation.apk  \
+
+
+PRODUCT_COPY_FILES += \
 	device/samsung/smdk4x12/apk/topeet/tencent_video/com.tencent.qqlive-1.apk:system/app/com.tencent.qqlive-1.apk \
 	device/samsung/smdk4x12/apk/topeet/tencent_video/lib/armeabi/libcftutils.so:system/lib/libcftutils.so \
 	device/samsung/smdk4x12/apk/topeet/tencent_video/lib/armeabi/libckeygenerator.so:system/lib/libckeygenerator.so \
