@@ -4,7 +4,7 @@
 
 ro.zygote.disable_gl_preload=true
 mouse.right.click=back
-ro.sf.hwrotation=0
+ro.sf.hwrotation=270
 ro.sf.hdmirotation=0
 
 ro.ril.ecclist=112,911
