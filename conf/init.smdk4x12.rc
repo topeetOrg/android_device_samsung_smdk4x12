@@ -1,0 +1,90 @@
+import init.wireless.rc
+import init.smdk4x12.usb.rc
+on early-init
+    export EXTERNAL_STORAGE /mnt/sdcard
+    mkdir /mnt/sdcard 0000 system system
+    mkdir /mnt/sdcard2 0775 system system
+    mkdir /mnt/udisk 0775 system system
+    mkdir /mnt/udisk1 0775 system system
+    symlink /mnt/sdcard /sdcard
+
+# jmq.disable
+#on post-fs-data
+    # we will remap this as /mnt/sdcard with the sdcard fuse tool
+#    mkdir /data/media 0775 media_rw media_rw
+#    chown media_rw media_rw /data/media
+service console /system/bin/sh
+    class core
+    console
+    group log
+
+#add by cym 20130622
+service cfg_audio /system/bin/cfg_audio
+    user system
+    group system
+    class main
+    oneshot
+#end add
+
+on boot
+    setprop ro.build.product smdk4x12
+    setprop ro.product.device smdk4x12
+    setprop ro.radio.noril yes
+
+on fs
+    mount ext4 /dev/block/mmcblk0p2 /system ro wait
+#   mount ext4 /dev/block/mmcblk0p3 /data wait nosuid nodev noatime nomblk_io_submit
+    mount ext4 /dev/block/mmcblk0p3 /data nosuid nodev noatime wait usedm discard,noauto_da_alloc,nodelalloc
+    mount ext4 /dev/block/mmcblk0p4 /cache wait nosuid nodev noatime nomblk_io_submit
+# jmq.disable
+#    setprop ro.crypto.fuse_sdcard true
+
+# Permissions for backlight
+    chmod 0665 /sys/class/backlight/pwm-backlight.0/brightness
+    chown system system /sys/class/backlight/pwm-backlight.0/brightness
+# Permissions for btpower
+    chown system system /sys/devices/platform/bt-sysfs/bt_power
+
+# create filesystem if necessary
+#service setup_fs /system/bin/setup_fs \
+#            /dev/block/mmcblk0p3 \
+#            /dev/block/mmcblk0p4
+#    class core
+#    user root
+#    group root
+#    oneshot
+
+# create virtual SD card at /mnt/sdcard, based on the /data/media directory
+# daemon will drop to user/group system/media_rw after initializing
+# underlying files in /data/media will be created with user and group media_rw (1023)
+# jmq.disable
+#service sdcard /system/bin/sdcard /data/media 1023 1023
+#    class late_start
+
+# Permissions for GPS
+    chmod 0777 /dev/ttySAC3
+    chmod 0777 /dev/AGPS
+    chown root root /data
+    chmod 0771 /data
+
+#add by cym support for RFID
+    chmod 0777 /dev/ttySAC1
+    chown root root /data
+    chmod 0771 /data
+		
+#yyd- 111206, add sensor
+    chmod 0777 /dev/mpu
+    chmod 0777 /dev/mpuirq
+#    chmod 0777 /dev/accelirq
+    chmod 0777 /dev/timerirq
+
+#add by cym 20130305
+    chmod 0777 /linuxrc
+    chmod 0777 /dev/adc
+    chmod 0777 /dev/buzzer_ctl
+    chmod 0777 /dev/max485_ctl_pin
+    chmod 0777 /dev/leds
+    chmod 0777 /dev/rc522
+    chmod 0777 /dev/ttySAC0
+    chmod 0777 /dev/ttySAC2
+    chmod 0777 /dev/relay_ctl
