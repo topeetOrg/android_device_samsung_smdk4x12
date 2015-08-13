@@ -108,8 +108,8 @@ endif
 #	device/samsung/smdk4x12/apk/com.apksoftware.compass.apk:system/app/com.apksoftware.compass.apk
 
 #replace sensor
-PRODUCT_COPY_FILES += \
-        device/samsung/smdk4x12/apk/sensors.smdk4x12.so:system/lib/hw/sensors.smdk4x12.so
+#PRODUCT_COPY_FILES += \
+#       device/samsung/smdk4x12/apk/sensors.smdk4x12.so:system/lib/hw/sensors.smdk4x12.so
 
 #Install Weather
 PRODUCT_COPY_FILES += \
@@ -415,13 +415,20 @@ PRODUCT_PACKAGES += \
 
 #add by cym 20130623
   include $(LOCAL_PATH)/../common/cfg_audio/cfg_audio_product_packages.mk
+  include $(LOCAL_PATH)/../common/lib3G/3g_product_packages.mk
 #  include $(LOCAL_PATH)/../common/libcamera/camera_product_packages.mk
 
 ifeq ($(BOARD_HAVE_GNS7560),true)
   include $(LOCAL_PATH)/../common/libgps/gps_product_packages.mk
 endif
-#end add
 
+ifneq ($(BOARD_HAVE_MPU6050),true)
+  include $(LOCAL_PATH)/../common/libsensors_mpu3050/sensors_product_packages.mk
+endif
+
+ifeq ($(BOARD_HAVE_MPU6050),true)
+  include $(LOCAL_PATH)/../common/libsensors_mpu6050/libsensors_product_packages.mk
+endif
 ifeq ($(BOARD_HAVE_MTK_MT6620),true)
   include $(LOCAL_PATH)/../common/mt6620/mt6620_product_package.mk
 endif
