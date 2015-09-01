@@ -92,7 +92,7 @@ PRODUCT_COPY_FILES += \
 	device/samsung/smdk4x12/apk/ESFileBrowser.apk:system/app/ESFileBrowser.apk  \
 
 PRODUCT_COPY_FILES += \
-	device/samsung/smdk4x12/apk/Set Orientation.apk:system/app/SetOrientation.apk  \
+	device/samsung/smdk4x12/apk/SetOrientation.apk:system/app/SetOrientation.apk  \
 
 
 PRODUCT_COPY_FILES += \
